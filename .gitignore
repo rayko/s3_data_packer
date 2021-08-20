@@ -6,3 +6,10 @@
 /pkg/
 /spec/reports/
 /tmp/
+log/*.log*
+*~
+*#*#*
+.DS_Store
+coverage/*
+*.swp
+*.iml
