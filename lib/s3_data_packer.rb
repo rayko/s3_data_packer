@@ -3,16 +3,7 @@ require 'json'
 
 require "s3_data_packer/version"
 require 's3_data_packer/configuration'
-require 's3_data_packer/package'
 require 's3_data_packer/packer'
-
-require 's3_data_packer/packages/csv'
-require 's3_data_packer/packages/json'
-
-require 's3_data_packer/sources/directory'
-require 's3_data_packer/sources/bucket'
-
-require 's3_data_packer/targets/s3'
 
 module S3DataPacker
   class << self
