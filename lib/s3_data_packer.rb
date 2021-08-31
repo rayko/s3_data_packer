@@ -1,9 +1,18 @@
 require 'csv'
 require 'json'
+require 'logger'
+require 'mime/types/full'
+require 'aws-sdk-s3'
 
 require "s3_data_packer/version"
 require 's3_data_packer/configuration'
 require 's3_data_packer/packer'
+require 's3_data_packer/queue'
+require 's3_data_packer/thread_set'
+require 's3_data_packer/summary'
+require 's3_data_packer/json_batch'
+require 's3_data_packer/bucket'
+require 's3_data_packer/filename_generator'
 
 module S3DataPacker
   class << self
@@ -17,7 +26,6 @@ module S3DataPacker
 
     def configure
       yield configuration
-      self.configuraiton
     end
 
     def logger
