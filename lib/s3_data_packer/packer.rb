@@ -24,7 +24,7 @@ module S3DataPacker
       @workers ||= S3DataPacker::ThreadSet.new
     end
 
-    def transfer!
+    def pack!
       log "Packing data from #{source.name}/#{source.path} to #{target.name}/#{target.path} ..."
       boot_workers!
 
