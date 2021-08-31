@@ -64,6 +64,7 @@ module S3DataPacker
       @workdir = 'tmp/s3_data_packer'
       @cleanup_batch = true
       @compress_batch = true
+      @output_filename_prefix = nil
       @output_filename_suffix = 'batch'
       @output_filename_pattern = %i[timecode_int suffix]
       @output_filename_splitter = '_'

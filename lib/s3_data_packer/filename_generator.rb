@@ -11,18 +11,18 @@ module S3DataPacker
      validate_pattern!
    end
 
-   def timecode_int; Time.now.to_i.to_s; end
-   def timecode_dec; Time.now.to_f.to_s; end
-   def number; @number.to_s; end
+   def timecode_int; Time.now.to_i; end
+   def timecode_dec; Time.now.to_f; end
+   def number; @number; end
    def timestamp; Time.now.strftime('%Y%m%d%H%M%s'); end
    def datestamp; Time.now.strftime('%Y%m%d'); end
-   def prefix; @prefix.to_s; end
-   def suffix; @suffix.to_s; end
+   def prefix; @prefix; end
+   def suffix; @suffix; end
 
    def generate!
      name = pattern.map{ |key| send(key) }
      name.delete_if { |value| value.nil? || value == '' }
-     name = name.join(splitter)
+     name = name.map(&:to_s).join(splitter)
      @number += 1
      name
    end
