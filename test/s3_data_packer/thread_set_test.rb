@@ -2,8 +2,7 @@ require 'test_helper'
 
 class ThreadSetTest < Minitest::Test
   def setup
-    @queue = S3DataPacker::Queue.new
-    @set = S3DataPacker::ThreadSet.new queue: @queue
+    @set = S3DataPacker::ThreadSet.new
   end
 
   def test_methods
@@ -21,6 +20,10 @@ class ThreadSetTest < Minitest::Test
     assert_respond_to @set, :spawn_thread!
     assert_respond_to @set, :spawn_threads!
     assert_respond_to @set, :reset!
+  end
+
+  def test_queue
+    assert_kind_of S3DataPacker::Queue, @set.queue
   end
 
   def test_default_wait_time
@@ -44,11 +47,11 @@ class ThreadSetTest < Minitest::Test
   end
 
   def test_finished?
-    @queue.add! 'item'
+    @set.queue.add! 'item'
     refute @set.finished?
     @set.finish!
     refute @set.finished?
-    @queue.fetch!
+    @set.queue.fetch!
     assert @set.finished?
   end
 

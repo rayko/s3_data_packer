@@ -32,15 +32,17 @@ class JSONBatchTest < Minitest::Test
   end
 
   def test_filename_generator
-    assert_kind_of Fiber, @batch.filename_generator
+    assert_kind_of S3DataPacker::FilenameGenerator, @batch.filename_generator
   end
 
   def test_generate_filename
     name = nil
     2.times do
+      @batch.new_file!
       new_name = @batch.generate_filename
       refute_equal name, new_name
       assert @batch.path.include?('.json')
+      @batch.close!
       sleep(1)
     end
   end
@@ -51,6 +53,7 @@ class JSONBatchTest < Minitest::Test
   end
 
   def test_append_data!
+    @batch.new_file!
     json = {lolcat: 1, madcat: 'abc'}.to_json
     @batch.append_data! json
     assert_equal @batch.item_count, 1
@@ -60,22 +63,26 @@ class JSONBatchTest < Minitest::Test
   end
 
   def test_path
+    @batch.new_file!
     file = @batch.batch
     assert_equal @batch.path, file.path
   end
 
   def test_close!
+    @batch.new_file!
     @batch.close!
     assert @batch.batch.closed?
   end
 
   def test_delete!
+    @batch.new_file!
     path = @batch.path
     @batch.delete!
     refute File.exist?(path)
   end
 
   def test_finalize_compress
+    @batch.new_file!
     S3DataPacker.config.compress_batch = true
     json = {lolcat: 1, madcat: 'abc'}.to_json
     @batch.append_data! json
@@ -88,6 +95,7 @@ class JSONBatchTest < Minitest::Test
   end
 
   def test_finalize_no_compress
+    @batch.new_file!
     S3DataPacker.config.compress_batch = false
     json = {lolcat: 1, madcat: 'abc'}.to_json
     @batch.append_data! json
