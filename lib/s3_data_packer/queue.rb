@@ -23,7 +23,11 @@ module S3DataPacker
     def add!(item)
       items << item
       @total_items += 1
-      sleep(wait_time) if size >= max_items
+      if size >= max_items
+        S3DataPacker.logger.info "Queue full, pausing"
+        sleep(wait_time)
+        S3DataPacker.logger.info "Resuming queue"
+      end
     end
 
     def fetch!
