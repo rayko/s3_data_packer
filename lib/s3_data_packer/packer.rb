@@ -52,6 +52,8 @@ module S3DataPacker
     private
 
     def finalize_processing!
+      log "No more items found to enqueue, signaling workers to finish"
+      workers.finish!
       workers.wait!
       workers.kill!
       log "Pushing last open batch #{output.path}"
