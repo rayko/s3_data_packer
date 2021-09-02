@@ -28,7 +28,7 @@ module S3DataPacker
       log "Packing data from #{source.name}/#{source.path} to #{target.name}/#{target.path} ..."
       boot_workers!
 
-      st = Time.now
+      @start_time = Time.now
       begin
         each_item { |item| workers.queue.add!(item) }
         finalize_processing!
@@ -58,7 +58,7 @@ module S3DataPacker
       workers.kill!
       log "Pushing last open batch #{output.path}"
       flush_batch!
-      summary.set_time(st, Time.now)
+      summary.set_time(@start_time, Time.now)
       log "Finished\n#{summary.flush!}"
     end
 
