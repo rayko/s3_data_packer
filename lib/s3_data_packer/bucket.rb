@@ -44,6 +44,10 @@ module S3DataPacker
     def download(key)
       begin
         data = object(key).get
+      rescue ::Aws::S3::Errors::InternalError
+        logger.warn "Aws::S3::Errors::InternalError, retrying in 1 second"
+        sleep(1)
+        retry
       rescue ::Aws::S3::Errors::InvalidRange
         logger.warn "Invalid range for #{key}"
         return nil
