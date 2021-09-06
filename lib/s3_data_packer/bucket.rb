@@ -38,23 +38,13 @@ module S3DataPacker
     # end
 
     def exist?(key)
-      object(key).exists?
+      request! { object(key).exists? }
     end
 
     def download(key)
-      begin
-        data = object(key).get
-      rescue ::Aws::S3::Errors::InternalError
-        logger.warn "Aws::S3::Errors::InternalError, retrying in 1 second"
-        sleep(1)
-        retry
-      rescue ::Aws::S3::Errors::InvalidRange
-        logger.warn "Invalid range for #{key}"
-        return nil
-      rescue ::Aws::S3::Errors::NoSuchKey
-        logger.warn "missing key #{key}"
-        return nil
-      end
+      data = request! { object(key).get }
+      logger.warn "missing key #{key}" unless data
+      return nil unless data
       data.body.read
     end
 
@@ -65,18 +55,26 @@ module S3DataPacker
       metadata = opts
       metadata[:content_type] ||= file_mime_type(file)
       metadata[:content_disposition] ||= 'attachement'
-
-      begin
-        object(key).upload_file(file, metadata)
-        logger.info "Uploaded #{file} to s3://#{name}/#{key}"
-      rescue ::Aws::S3::Errors::InternalError
-        logger.warn "Aws::S3::Errors::InternalError while pushing"
-        sleep(1)
-        retry
-      end
+      request! { object(key).upload_file(file, metadata) }
+      logger.info "Uploaded #{file} to s3://#{name}/#{key}"
     end
 
     private
+
+    def request! &block
+      begin
+        yield
+      rescue Aws::S3::Errors::InternalError
+        logger.warn "Aws::S3::Errors::InternalError, retrying in 1 second"
+        sleep(1)
+        retry
+      rescue Aws::S3::Errors::InvalidRange
+        logger.warn "Invalid range"
+        return nil
+      rescue Aws::S3::Errors::NoSuchKey
+        return nil
+      end
+    end
 
     def client
       @client ||= ::Aws::S3::Client.new(region: region, credentials: credentials)
