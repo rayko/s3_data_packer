@@ -27,16 +27,6 @@ module S3DataPacker
       end
     end
 
-    # def delete_keys(prefix)
-    #   bucket.objects(prefix: prefix).each do |item|
-    #     item.delete
-    #   end
-    # end
-
-    # def delete(key)
-    #   object(key).delete
-    # end
-
     def exist?(key)
       request! { object(key).exists? }
     end
