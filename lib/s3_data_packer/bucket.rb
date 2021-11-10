@@ -21,7 +21,7 @@ module S3DataPacker
       @logger ||= S3DataPacker.logger
     end
 
-    def each_key
+    def each
       bucket.objects(prefix: path).each do |item|
         yield item.key
       end
@@ -41,7 +41,7 @@ module S3DataPacker
       request! { object(key).exists? }
     end
 
-    def download(key)
+    def fetch(key)
       data = request! { object(key).get }
       logger.warn "missing key #{key}" unless data
       return nil unless data

@@ -63,7 +63,7 @@ module S3DataPacker
     end
 
     def each_item &block
-      source.each_key do |key|
+      source.each do |key|
         if workers.dead?
           log "Workers diead", :error
           raise Error::DeadWorkers, 'Workers died'
@@ -87,7 +87,7 @@ module S3DataPacker
     def boot_workers!
       output.new_file!
       workers.spawn_threads! do |item|
-        data = source.download(item)
+        data = source.fetch(item)
         workers.lock.synchronize { process_item(data) }
         post_process_item(item)
       end
