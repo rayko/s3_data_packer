@@ -25,7 +25,7 @@ module S3DataPacker
     end
 
     def pack!
-      log "Packing data from #{source.name}/#{source.path} to #{target.name}/#{target.path} ..."
+      log "Packing data from #{source.name} to #{target.name} ..."
       boot_workers!
 
       @start_time = Time.now
@@ -63,13 +63,13 @@ module S3DataPacker
     end
 
     def each_item &block
-      source.each do |key|
+      source.each do |item|
         if workers.dead?
           log "Workers diead", :error
           raise Error::DeadWorkers, 'Workers died'
         end
         summary.count_item
-        yield key
+        yield item
       end
     end
 
@@ -81,7 +81,7 @@ module S3DataPacker
     end
 
     def send_file!(file)
-      target.upload file
+      target.save_file file
     end
 
     def boot_workers!
