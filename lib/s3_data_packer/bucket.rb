@@ -1,9 +1,9 @@
 module S3DataPacker
   class Bucket
-    attr_reader :name, :path
+    attr_reader :bucket_name, :path
 
     def initialize opts = {}
-      @name = opts[:name]
+      @bucket_name = opts[:bucket_name]
       @credentials = opts[:credentials]
       @region = opts[:region]
       @path = opts[:path]
@@ -21,7 +21,7 @@ module S3DataPacker
       @logger ||= S3DataPacker.logger
     end
 
-    def each
+    def each_key &block
       bucket.objects(prefix: path).each do |item|
         yield item.key
       end
@@ -31,7 +31,7 @@ module S3DataPacker
       request! { object(key).exists? }
     end
 
-    def fetch(key)
+    def download(key)
       data = request! { object(key).get }
       logger.warn "missing key #{key}" unless data
       return nil unless data
@@ -46,7 +46,7 @@ module S3DataPacker
       metadata[:content_type] ||= file_mime_type(file)
       metadata[:content_disposition] ||= 'attachement'
       request! { object(key).upload_file(file, metadata) }
-      logger.info "Uploaded #{file} to s3://#{name}/#{key}"
+      logger.info "Uploaded #{file} to s3://#{bucket_name}/#{key}"
     end
 
     private
@@ -83,7 +83,7 @@ module S3DataPacker
     end
 
     def bucket
-      @bucket ||= resource.bucket(name)
+      @bucket ||= resource.bucket(bucket_name)
     end
 
     def resource
