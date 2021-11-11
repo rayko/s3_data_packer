@@ -17,6 +17,8 @@ require 's3_data_packer/filename_generator'
 require 's3_data_packer/sources/object'
 require 'S3_data_packer/sources/s3_bucket'
 
+require 's3_data_packer/targets/s3_bucket'
+
 module S3DataPacker
   class << self
     attr_reader :configuration
