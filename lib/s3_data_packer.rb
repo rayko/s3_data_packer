@@ -13,7 +13,9 @@ require 's3_data_packer/summary'
 require 's3_data_packer/json_batch'
 require 's3_data_packer/bucket'
 require 's3_data_packer/filename_generator'
-require 's3_data_packer/object_source'
+
+require 's3_data_packer/sources/object'
+require 'S3_data_packer/sources/s3_bucket'
 
 module S3DataPacker
   class << self
