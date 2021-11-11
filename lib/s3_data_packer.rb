@@ -15,7 +15,7 @@ require 's3_data_packer/bucket'
 require 's3_data_packer/filename_generator'
 
 require 's3_data_packer/sources/object'
-require 'S3_data_packer/sources/s3_bucket'
+require 's3_data_packer/sources/s3_bucket'
 
 require 's3_data_packer/targets/s3_bucket'
 
