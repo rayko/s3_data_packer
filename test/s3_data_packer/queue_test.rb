@@ -5,6 +5,15 @@ class QueueTest < Minitest::Test
     @queue = S3DataPacker::Queue.new
   end
 
+  def test_add_sleep
+    S3DataPacker.config.max_queue_size = 3
+    S3DataPacker.config.max_queue_wait = 1
+    st = Time.now.to_f
+    4.times { |n| @queue.add!(n) }
+    et = Time.now.to_f
+    assert (et - st) < 3
+  end
+
   def test_methods
     assert_respond_to @queue, :total_items
     assert_respond_to @queue, :max_items
