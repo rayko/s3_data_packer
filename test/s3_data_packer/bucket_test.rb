@@ -12,6 +12,26 @@ class BucketTest < Minitest::Test
     end
   end
 
+  def test_fail_mime_type
+    explode = proc { raise 'FAIL' }
+    MIME::Types.stub :type_for, explode do
+      assert @bucket.send(:file_mime_type, '') == nil
+    end
+  end
+  
+  def test_request_fail
+    explode = proc do
+      unless @already_exploded
+        @already_exploded = true
+        raise Aws::S3::Errors::InternalError.new('', '')
+      end
+    end
+    st = Time.now.to_f
+    @bucket.send(:request!) { explode.call }
+    et = Time.now.to_f
+    assert (et - st) < 3
+  end
+
   def test_logger
     with_fake_s3 do
       assert @bucket.logger == S3DataPacker.logger

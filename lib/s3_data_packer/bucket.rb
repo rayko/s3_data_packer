@@ -58,9 +58,6 @@ module S3DataPacker
         logger.warn "Aws::S3::Errors::InternalError, retrying in 1 second"
         sleep(1)
         retry
-      rescue Aws::S3::Errors::InvalidRange
-        logger.warn "Invalid range"
-        return nil
       rescue Aws::S3::Errors::NoSuchKey
         return nil
       end
@@ -71,6 +68,7 @@ module S3DataPacker
         MIME::Types.type_for(file).first.content_type
       rescue StandardError
         logger.error "Could not guess MIME type of #{file}"
+        return nil
       end
     end
 
