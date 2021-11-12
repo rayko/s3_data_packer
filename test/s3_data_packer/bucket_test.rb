@@ -103,4 +103,12 @@ class BucketTest < Minitest::Test
       File.delete(file.path)
     end
   end
+
+  def test_private_resource_method
+    mock = Minitest::Mock.new
+    def mock.new; true; end
+    Aws::S3::Resource.stub :new, mock do
+      assert @bucket.send(:resource)
+    end
+  end
 end
