@@ -9,4 +9,8 @@ unless Dir.exist?(WORKDIR)
   Dir.mkdir 'tmp/test_data'
 end
 
+
+
 require "minitest/autorun"
+require 'fake_s3'
+
