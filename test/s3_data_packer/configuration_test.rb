@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ConfigurationTest << Minitest::Test
+class ConfigurationTest < Minitest::Test
   def setup
     @config = S3DataPacker::Configuration.new
   end
@@ -67,5 +67,15 @@ class ConfigurationTest << Minitest::Test
     assert_equal 'tmp/s3_data_packer', @config.workdir
     assert_equal true, @config.cleanup_batch
     assert_equal true, @config.compress_batch
+    assert_equal true, @config.cleanup_batch?
+    assert_equal true, @config.compress_batch?
+  end
+
+  def test_default_s3_credentials
+    @config.s3_api_key = 'lol'
+    @config.s3_api_secret = 'cat'
+    assert @config.default_s3_credentials != nil
+    assert Aws::Credentials === @config.default_s3_credentials
+    assert @config.default_s3_credentials.access_key_id == @config.s3_api_key
   end
 end
