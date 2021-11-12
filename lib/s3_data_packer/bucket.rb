@@ -66,10 +66,6 @@ module S3DataPacker
       end
     end
 
-    def client
-      @client ||= ::Aws::S3::Client.new(region: region, credentials: credentials)
-    end
-
     def file_mime_type(file)
       begin
         MIME::Types.type_for(file).first.content_type
