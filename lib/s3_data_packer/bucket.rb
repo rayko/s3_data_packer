@@ -1,9 +1,9 @@
 module S3DataPacker
   class Bucket
-    attr_reader :name, :path
+    attr_reader :bucket_name, :path
 
     def initialize opts = {}
-      @name = opts[:name]
+      @bucket_name = opts[:bucket_name]
       @credentials = opts[:credentials]
       @region = opts[:region]
       @path = opts[:path]
@@ -21,21 +21,11 @@ module S3DataPacker
       @logger ||= S3DataPacker.logger
     end
 
-    def each_key
+    def each_key &block
       bucket.objects(prefix: path).each do |item|
         yield item.key
       end
     end
-
-    # def delete_keys(prefix)
-    #   bucket.objects(prefix: prefix).each do |item|
-    #     item.delete
-    #   end
-    # end
-
-    # def delete(key)
-    #   object(key).delete
-    # end
 
     def exist?(key)
       request! { object(key).exists? }
@@ -56,7 +46,7 @@ module S3DataPacker
       metadata[:content_type] ||= file_mime_type(file)
       metadata[:content_disposition] ||= 'attachement'
       request! { object(key).upload_file(file, metadata) }
-      logger.info "Uploaded #{file} to s3://#{name}/#{key}"
+      logger.info "Uploaded #{file} to s3://#{bucket_name}/#{key}"
     end
 
     private
@@ -68,16 +58,9 @@ module S3DataPacker
         logger.warn "Aws::S3::Errors::InternalError, retrying in 1 second"
         sleep(1)
         retry
-      rescue Aws::S3::Errors::InvalidRange
-        logger.warn "Invalid range"
-        return nil
       rescue Aws::S3::Errors::NoSuchKey
         return nil
       end
-    end
-
-    def client
-      @client ||= ::Aws::S3::Client.new(region: region, credentials: credentials)
     end
 
     def file_mime_type(file)
@@ -85,6 +68,7 @@ module S3DataPacker
         MIME::Types.type_for(file).first.content_type
       rescue StandardError
         logger.error "Could not guess MIME type of #{file}"
+        return nil
       end
     end
 
@@ -93,7 +77,7 @@ module S3DataPacker
     end
 
     def bucket
-      @bucket ||= resource.bucket(name)
+      @bucket ||= resource.bucket(bucket_name)
     end
 
     def resource

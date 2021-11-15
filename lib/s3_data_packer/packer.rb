@@ -25,7 +25,7 @@ module S3DataPacker
     end
 
     def pack!
-      log "Packing data from #{source.name}/#{source.path} to #{target.name}/#{target.path} ..."
+      log "Packing data from #{source.name} to #{target.name} ..."
       boot_workers!
 
       @start_time = Time.now
@@ -63,13 +63,13 @@ module S3DataPacker
     end
 
     def each_item &block
-      source.each_key do |key|
+      source.each do |item|
         if workers.dead?
           log "Workers diead", :error
           raise Error::DeadWorkers, 'Workers died'
         end
         summary.count_item
-        yield key
+        yield item
       end
     end
 
@@ -77,17 +77,16 @@ module S3DataPacker
       summary.count_batch
       final_filename = output.finalize!
       send_file!(final_filename)
-      File.delete(final_filename) if S3DataPacker.config.cleanup_batch?
     end
 
     def send_file!(file)
-      target.upload file
+      target.save_file file
     end
 
     def boot_workers!
       output.new_file!
       workers.spawn_threads! do |item|
-        data = source.download(item)
+        data = source.fetch(item)
         workers.lock.synchronize { process_item(data) }
         post_process_item(item)
       end

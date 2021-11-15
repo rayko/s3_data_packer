@@ -19,6 +19,12 @@ Add this line to your application's Gemfile:
 gem 's3_data_packer'
 ```
 
+Or use the `main` branch from repo:
+
+```ruby
+gem 's3_data_packer', git: 'https://github.com/rayko/s3_data_packer.git', branch: 'main'
+```
+
 And then execute:
 
     $ bundle
@@ -110,8 +116,8 @@ To launch the packer, the only thing needed out of the box, is to instantiate 2 
 objects that will act as source and destination:
 
 ```
-source_bucket = S3DataPacker::Bucket.new name: 'my-bucket', path: 'some/location'
-target_bucket = S3DataPacker::Bucket.new name: 'other-bucket', path: 'my/destination'
+source_bucket = S3DataPacker::Sources::S3Bucket.new name: 'my-bucket', path: 'some/location'
+target_bucket = S3DataPacker::Sources::S3Bucket.new name: 'other-bucket', path: 'my/destination'
 ```
 
 You can override the configured AWS credentials with the `:credentials` option, as well as `:region`.
@@ -150,6 +156,86 @@ a feature for later.
 
 There are no specialties regarding source and target buckets, they can be the same, on different accounts
 or region. However it is not recommended to setup source and target on the same bucket and path.
+
+### Custom Sources/Targets
+
+It is possible to define a custom source and target for the packer to read data from some different place
+that is not an S3 bucket, as well as put the resultant batch into somewhere else. The `S3DataPacker::Packer`
+can take `:source` and `:target` parameters to use other things. At the moment, there are 2 source classes
+provided:
+
+- `S3DataPacker::Sources::S3Bucket`
+- `S3DataPacker::Sources::Object`
+
+And 2 pre-defined target:
+
+- `S3DataPacker::Targets::S3Bucket`
+- `S3DataPacker::Targets::Object`
+
+Both bucket related classes operate in the same way, you need to define the name and path of the buckets
+to read and write the data, as in the main example above. Be sure to configure credentials to use these.
+
+The object source is pretty much a wrapper you can use with some other custom object, passing down which
+methods to call on it for the packer. Any object you pass down in the object source needs to respond to:
+
+- `#name`: which is mostly used for logging
+- `#each`: with a block to iterate over items
+- `#fetch`: with an identifier to find the actual data of the item
+
+The `#each` and `#fetch` methods are like that mainly because the packer is threaded and it expects to
+iterate over keys, or IDs or some minor piece of information in one thread, and use that information
+to retrive the full object data on other threads. This keeps the queue small in byte size.
+
+By default the object source expects those method names to be defined in the object provided. If there
+are other methods that do that already on the object but with different name, the method names can be
+passed like so:
+
+```ruby
+S3DataPacker::Sources::Object.new object: my_object, 
+                                  each_method: :iterate, 
+                                  fetch_method: :find, 
+                                  name_method: :display_name
+```
+
+As long as `#each` yields items (strings, IDs, whatever), and `#fetch` returns JSON data for an item,
+this should work.
+
+For targets, there's also a `S3DataPacker::Targets::Object` that can be used in the a similar way, the only
+2 methods for it are: 
+
+- `#name`: for the same purposes as sources `#name` method
+- `#save_file`: with a path parameter
+
+It can also be configured with other method names if needed:
+
+```ruby
+S3DataPacker::Targets::Object.new object: my_object,
+                                  name_method: :custom_name,
+                                  save_file_method: :save!
+```
+
+It is also possible to construct a custom source/target class outside of the pre-defined ones that can
+do anything needed, and passed down to the packer instance to use. As long as the few needed methods are
+there, it should work just fine.
+
+In some cases it might be useful to unify the get/fetch mechanics. This can be easily done by just
+bypassing the `#fetch` method and returning the data received. If for some reason the iterator for
+`#each` needs to output the actual data right there, by writing a `#fetch` method that returns whatever
+was passed in the parameter, effectively makes the packer's queue hold actual data. This might be useful
+in some cases, though it might need a smaller max size configuration to prevent having too much data in the
+queue.
+
+I believe that with these tools, the packer can pretty much do the JSON packing in most cases, including:
+
+- Reading database records and serializing them into JSON
+- Reading S3 buckets (as originally intended)
+- Reading NoSQL items
+- Reading one file or a set of files
+- Writing batches into S3 buckets (as originally intended)
+- Writing batches into filesystem on some custom location
+- Writing batches into some other custom location
+
+At least, it does cover the cases in where I intend to use it.
 
 ## Development
 

@@ -66,7 +66,7 @@ module S3DataPacker
             begin
               yield item
             rescue ThreadError
-              log id, "Locked, retry in #{lock_waittime}", :warn
+              log id, "Locked, retry in #{lock_wait_time}", :warn
               sleep(lock_wait_time)
               retry
             end

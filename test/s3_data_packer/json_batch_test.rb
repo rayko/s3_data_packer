@@ -8,7 +8,7 @@ class JSONBatchTest < Minitest::Test
     end
     @batch = S3DataPacker::JSONBatch.new
   end
-        
+
   def test_methods
     assert_respond_to @batch, :workdir
     assert_respond_to @batch, :delimitter
@@ -21,6 +21,20 @@ class JSONBatchTest < Minitest::Test
     assert_respond_to @batch, :close!
     assert_respond_to @batch, :delete!
     assert_respond_to @batch, :finalize!
+  end
+
+  def test_size
+    assert_equal @batch.size, S3DataPacker.config.batch_size
+  end
+
+  def test_full?
+    @batch.new_file!
+    S3DataPacker.config.batch_size = 3
+    assert !@batch.full?
+    3.times do
+      @batch.append_data! "{'asd':1}"
+    end
+    assert @batch.full?
   end
 
   def test_delimitter
