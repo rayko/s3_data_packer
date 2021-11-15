@@ -167,12 +167,13 @@ provided:
 - `S3DataPacker::Sources::S3Bucket`
 - `S3DataPacker::Sources::Object`
 
-And 1 pre-defined target:
+And 2 pre-defined target:
 
 - `S3DataPacker::Targets::S3Bucket`
+- `S3DataPacker::Targets::Object`
 
 Both bucket related classes operate in the same way, you need to define the name and path of the buckets
-to read and write the data, as in the main example above.
+to read and write the data, as in the main example above. Be sure to configure credentials to use these.
 
 The object source is pretty much a wrapper you can use with some other custom object, passing down which
 methods to call on it for the packer. Any object you pass down in the object source needs to respond to:
@@ -196,7 +197,7 @@ S3DataPacker::Sources::Object.new object: my_object,
                                   name_method: :display_name
 ```
 
-As long as `#each` yields items (strings, IDs, whatever), and `#fetch` returns JSON data with for an item,
+As long as `#each` yields items (strings, IDs, whatever), and `#fetch` returns JSON data for an item,
 this should work.
 
 For targets, there's also a `S3DataPacker::Targets::Object` that can be used in the a similar way, the only
@@ -214,7 +215,7 @@ S3DataPacker::Targets::Object.new object: my_object,
 ```
 
 It is also possible to construct a custom source/target class outside of the pre-defined ones that can
-do anything needed, and passed down to the packer instance to use. As long as few needed methods are
+do anything needed, and passed down to the packer instance to use. As long as the few needed methods are
 there, it should work just fine.
 
 In some cases it might be useful to unify the get/fetch mechanics. This can be easily done by just
