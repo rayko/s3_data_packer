@@ -18,6 +18,7 @@ require 's3_data_packer/sources/object'
 require 's3_data_packer/sources/s3_bucket'
 
 require 's3_data_packer/targets/s3_bucket'
+require 's3_data_packer/targets/object'
 
 module S3DataPacker
   class << self
