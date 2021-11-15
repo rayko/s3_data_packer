@@ -8,6 +8,7 @@ module S3DataPacker
 
       def save_file(filepath)
         upload(filepath)
+        File.delete(filepath) if S3DataPacker.config.cleanup_batch?
       end
     end
 

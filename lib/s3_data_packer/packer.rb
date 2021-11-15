@@ -77,7 +77,6 @@ module S3DataPacker
       summary.count_batch
       final_filename = output.finalize!
       send_file!(final_filename)
-      File.delete(final_filename) if S3DataPacker.config.cleanup_batch?
     end
 
     def send_file!(file)
