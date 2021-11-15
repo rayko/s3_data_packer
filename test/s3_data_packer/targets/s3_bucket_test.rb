@@ -24,7 +24,7 @@ class S3BucketTargetTest < Minitest::Test
       @target.save_file file.path
       assert @fake_resource.bucket('test').store.keys.size == 1
       assert @fake_resource.bucket('test').store.values.first == 'asd qwe'
-      File.delete(file.path)
+      File.delete(file.path) if File.exist?(file.path)
     end
   end
 
